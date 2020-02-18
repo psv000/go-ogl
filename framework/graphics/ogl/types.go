@@ -63,6 +63,9 @@ type (
 		Args interface{}
 	}
 
+	// UniformCat ...
+	UniformCat int
+
 	// UniformType ...
 	UniformType int
 
@@ -77,6 +80,14 @@ type (
 		Typ UniformType
 		// Dst ...
 		Dst Destination
+	}
+
+	// ProgramPack ...
+	ProgramPack struct {
+		// ID ...
+		ID uint32
+		// Uniforms ...
+		Uniforms map[UniformCat][]Uniform
 	}
 )
 

@@ -90,3 +90,10 @@ const (
 
 	UColorName     = "uColor"
 )
+
+const (
+	// UCMesh ...
+	UCMesh UniformCat = iota
+	// UCLight ...
+	UCLight
+)

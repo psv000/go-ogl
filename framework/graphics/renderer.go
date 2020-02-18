@@ -24,7 +24,7 @@ type (
 
 		camera *scene.Camera
 
-		meshes []*primitives.Mesh
+		groups []*MeshGroup
 	}
 )
 
@@ -76,12 +76,64 @@ func (r *Renderer) Update() {
 	if r.camera != nil {
 		view, projection = r.camera.View(), r.camera.Projection()
 	}
-	for _, m := range r.meshes {
-		m.Draw(r.artist, view, projection)
+	//for _, m := range r.meshes {
+	//	m.Draw(r.artist, view, projection)
+	//}
+
+	for _, g := range r.groups {
+		r.artist.DrawMeshGroup(g, view, projection)
 	}
 
 	r.queue.Process()
 	r.queue.Flush()
+}
+
+// NewMeshGroup ...
+func (r *Renderer) NewMeshGroup() (*MeshGroup, error) {
+	p, err := r.dev.CompileProgram("assets/programs/lighting.vert", "assets/programs/lighting.frag")
+	if err != nil {
+		return nil, err
+	}
+	mg := &MeshGroup{}
+	var (
+	mArgs = []ogl.ProgramArg{
+		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
+		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
+		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
+		{Name: ogl.UColorName, Typ: ogl.Vec4Uniform, Dst: ogl.ColorDst},
+	}
+	lArgs = []ogl.ProgramArg {
+		{Name: ogl.ULightColorName, Typ: ogl.Vec3Uniform, Dst: ogl.LightColorDst},
+		{Name: ogl.ULightPositionName, Typ: ogl.Vec3Uniform, Dst: ogl.LightPosDst},
+	}
+	)
+	mUniforms := ogl.NewUniforms(r.dev, p, mArgs)
+	lUniforms := ogl.NewUniforms(r.dev, p, lArgs)
+	mg.GPUPack   = ogl.ProgramPack{
+		ID:       p,
+		Uniforms: map[ogl.UniformCat][]ogl.Uniform{
+			ogl.UCMesh: mUniforms,
+			ogl.UCLight: lUniforms,
+		},
+	}
+
+	r.groups = append(r.groups, mg)
+	return mg, nil
+}
+
+// DelMeshGroup ...
+func (r *Renderer) DelMeshGroup(mg *MeshGroup) {
+	var toDel int = -1
+	for i, ptr := range r.groups {
+		if ptr == mg {
+			toDel = i
+		}
+	}
+	if toDel >= 0 {
+		newlen := len(r.groups) - 1
+		r.groups[toDel], r.groups[newlen] = r.groups[newlen], r.groups[toDel]
+		r.groups = r.groups[:newlen]
+	}
 }
 
 // LoadMesh ...
@@ -114,7 +166,6 @@ func (r *Renderer) LoadMeshFromFile(filepath string) (*primitives.Mesh, error) {
 	n := primitives.NewNode()
 	m := primitives.NewMesh(n, oglMesh)
 
-	r.meshes = append(r.meshes, m)
 	return m, nil
 }
 
@@ -125,14 +176,12 @@ func (r *Renderer) LoadMeshFromData(data interface{}, indices []uint32) (*primit
 		if err != nil {
 			return nil, errors.Wrap(err, rendererInfoTag)
 		}
-		r.meshes = append(r.meshes, m)
 		return m, nil
 	case []ogl.V3fC4b:
 		m, err := loadFromV3fC4b(r.dev, data, indices)
 		if err != nil {
 			return nil, errors.Wrap(err, rendererInfoTag)
 		}
-		r.meshes = append(r.meshes, m)
 		return m, nil
 	default:
 		return nil, errors.New(rendererInfoTag + ": invalid mesh data type")

@@ -25,6 +25,11 @@ func (m *Mesh) Draw(qa general.Artist, view, projection mth.Mat4f) {
 	qa.DrawMesh(m.back, m.node.Update(), view, projection, m.color)
 }
 
+// Gl ...
+func (m *Mesh) Gl() interface{} {
+	return m.back
+}
+
 // Node ...
 func (m *Mesh) Node() *Node {
 	return m.node
@@ -33,4 +38,9 @@ func (m *Mesh) Node() *Node {
 // SetColor ...
 func (m *Mesh) SetColor(color mth.Vec4f32) {
 	m.color = color
+}
+
+// Color ...
+func (m *Mesh) Color() mth.Vec4f32 {
+	return m.color
 }

@@ -114,7 +114,7 @@ func (s *Sample) Update(dt time.Duration) {
 	sx, sy, sz = sc, sc, sc
 
 	var px, py, pz float64
-	px = math.Sin(ms*100.) * 0.5 - 0.5
+	px = math.Sin(ms*100.)*0.5 - 0.5
 
 	_, _, _ = x, y, z
 	_, _, _ = sx, sy, sz

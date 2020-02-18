@@ -38,10 +38,6 @@ func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f,
 			u.arg = view
 		case ProjectionDst:
 			u.arg = projection
-		case LightPosDst:
-			u.arg = mth.Vec3f32{0., 0., 0.}
-		case LightColorDst:
-			u.arg = mth.Vec3f32{1., 1., 1.}
 		case ColorDst:
 			u.arg = color
 		default:
@@ -67,22 +63,52 @@ func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f,
 	})
 }
 
-func (a *Artist) DrawMeshGroup(
-	group graphics.MeshGroup,
-	model, view, projection mth.Mat4f,
-	color mth.Vec4f32,
-	ls []graphics.LightSource){
+// DrawMeshGroup ...
+func (a *Artist) DrawMeshGroup(group graphics.MeshGroup, view, projection mth.Mat4f){
+
+	lu := group.GPUPack.Uniforms[UCLight]
+	lm := group.GPUPack.Uniforms[UCMesh]
+
+	var uniforms []Uniform
+	for _, l := range group.LightSources {
+		for i, u := range lu {
+			switch u.dst {
+			case LightPosDst:
+				u.arg = l.Pos
+			case LightColorDst:
+				u.arg = l.Col
+			}
+			lu[i] = u
+
+		}
+	}
+	uniforms = append(uniforms, lu...)
 
 	for _, m := range group.Meshes {
+		oglMesh, ok := m.Gl().(*Mesh)
+		checkConversion(ok)
+		for _, u := range lm {
+			switch u.dst {
+			case ModelDst:
+				u.arg = m.Node().Update()
+			case ViewDst:
+				u.arg = view
+			case ProjectionDst:
+				u.arg = projection
+			case ColorDst:
+				u.arg = m.Color()
+			default:
+				logrus.Panic("unknown uniform dst")
+			}
+		}
 
-		m.Node()
 		a.queue.AddCmd(Command{
 			Ct:   ApplyProgramCmd,
-			Args: oglMesh.program,
+			Args: group.GPUPack.ID,
 		})
 		a.queue.AddCmd(Command{
 			Ct:   ApplyUniformsCmd,
-			Args: oglMesh.uniforms,
+			Args: append(uniforms, lm...),
 		})
 		a.queue.AddCmd(Command{
 			Ct: DrawMeshCmd,
@@ -92,5 +118,4 @@ func (a *Artist) DrawMeshGroup(
 			},
 		})
 	}
-
 }
