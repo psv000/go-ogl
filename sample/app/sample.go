@@ -1,7 +1,6 @@
 package app
 
 import (
-	"framework/graphics"
 	"framework/mth"
 	"math"
 	"time"
@@ -95,8 +94,12 @@ func (s *Sample) Start(sp core.ServicePack) {
 	s.mesh.SetColor(mth.Vec4f32{0., 1., 0., 1.})
 	//s.mesh.Node().Rotate(rad(45.), 0., 0.)
 
+	s.mg, err = s.pl.NewMeshGroup()
+	if err != nil {
+		logrus.Panic(err)
+	}
 	s.mg.Meshes = append(s.mg.Meshes, s.mesh)
-	s.mg.LightSources = append(s.mg.LightSources, graphics.LightSource{
+	s.mg.LightSources = append(s.mg.LightSources, primitives.LightSource{
 		Pos: mth.Vec3f32{0.,0.,0.},
 		Col: mth.Vec3f32{1., 1., 1.},
 	})

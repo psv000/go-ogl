@@ -1,6 +1,7 @@
 package ogl
 
 import (
+	program2 "framework/graphics/program"
 	"runtime"
 
 	"github.com/sirupsen/logrus"
@@ -11,14 +12,14 @@ type (
 	Mesh struct {
 		vao, vbo, ibo, program uint32
 		indicesLen             int32
-		uniforms               []Uniform
+		uniforms               []program2.Uniform
 
 		dev *OpenGL
 	}
 )
 
 // NewMesh ...
-func NewMesh(device interface{}, program uint32, uniforms []Uniform) *Mesh {
+func NewMesh(device interface{}, program uint32, uniforms []program2.Uniform) *Mesh {
 	oglDevice, converted := device.(*OpenGL)
 	if !converted {
 		logrus.Panic(openGLDeviceInfoTag + ": invalid ogl device")

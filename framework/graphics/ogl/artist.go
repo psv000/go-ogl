@@ -2,6 +2,8 @@ package ogl
 
 import (
 	"framework/graphics/primitives"
+	"framework/graphics/program"
+	"framework/graphics/utils"
 	"framework/mth"
 
 	"github.com/sirupsen/logrus"
@@ -29,18 +31,18 @@ func (a *Artist) ClearScreen() {
 
 func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f, color mth.Vec4f32) {
 	oglMesh, ok := glMesh.(*Mesh)
-	checkConversion(ok)
+	utils.CheckConversion(ok)
 
 	for i, u := range oglMesh.uniforms {
-		switch u.dst {
-		case ModelDst:
-			u.arg = model
-		case ViewDst:
-			u.arg = view
-		case ProjectionDst:
-			u.arg = projection
-		case ColorDst:
-			u.arg = color
+		switch u.Dst {
+		case program.ModelDst:
+			u.Arg = model
+		case program.ViewDst:
+			u.Arg = view
+		case program.ProjectionDst:
+			u.Arg = projection
+		case program.ColorDst:
+			u.Arg = color
 		default:
 			logrus.Panic("unknown uniform dst")
 		}
@@ -65,21 +67,18 @@ func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f,
 }
 
 // DrawMeshGroup ...
-func (a *Artist) DrawMeshGroup(data interface{}, view, projection mth.Mat4f){
-	group, ok := data.(*primitives.MeshGroup)
-	checkConversion(ok)
+func (a *Artist) DrawMeshGroup(group *primitives.MeshGroup, view, projection mth.Mat4f){
+	lu := group.GPUPack.Uniforms[program.UCLight]
+	lm := group.GPUPack.Uniforms[program.UCMesh]
 
-	lu := group.GPUPack.Uniforms[UCLight]
-	lm := group.GPUPack.Uniforms[UCMesh]
-
-	var uniforms []Uniform
+	var uniforms []program.Uniform
 	for _, l := range group.LightSources {
 		for i, u := range lu {
-			switch u.dst {
-			case LightPosDst:
-				u.arg = l.Pos
-			case LightColorDst:
-				u.arg = l.Col
+			switch u.Dst {
+			case program.LightPosDst:
+				u.Arg = l.Pos
+			case program.LightColorDst:
+				u.Arg = l.Col
 			}
 			lu[i] = u
 
@@ -89,20 +88,21 @@ func (a *Artist) DrawMeshGroup(data interface{}, view, projection mth.Mat4f){
 
 	for _, m := range group.Meshes {
 		oglMesh, ok := m.Gl().(*Mesh)
-		checkConversion(ok)
-		for _, u := range lm {
-			switch u.dst {
-			case ModelDst:
-				u.arg = m.Node().Update()
-			case ViewDst:
-				u.arg = view
-			case ProjectionDst:
-				u.arg = projection
-			case ColorDst:
-				u.arg = m.Color()
+		utils.CheckConversion(ok)
+		for i, u := range lm {
+			switch u.Dst {
+			case program.ModelDst:
+				u.Arg = m.Node().Update()
+			case program.ViewDst:
+				u.Arg = view
+			case program.ProjectionDst:
+				u.Arg = projection
+			case program.ColorDst:
+				u.Arg = m.Color()
 			default:
 				logrus.Panic("unknown uniform dst")
 			}
+			lm[i] = u
 		}
 
 		a.queue.AddCmd(Command{

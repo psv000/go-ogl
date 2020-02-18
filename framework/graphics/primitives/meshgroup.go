@@ -1,7 +1,7 @@
 package primitives
 
 import (
-	"framework/graphics/ogl"
+	"framework/graphics/program"
 )
 
 type (
@@ -12,6 +12,6 @@ type (
 		// LightSources ...
 		LightSources []LightSource
 		// GPUPack ...
-		GPUPack ogl.ProgramPack
+		GPUPack program.Pack
 	}
 )

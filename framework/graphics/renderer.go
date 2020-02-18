@@ -1,6 +1,7 @@
 package graphics
 
 import (
+	"framework/graphics/program"
 	"framework/mth"
 	"framework/resources"
 	"image"
@@ -76,9 +77,6 @@ func (r *Renderer) Update() {
 	if r.camera != nil {
 		view, projection = r.camera.View(), r.camera.Projection()
 	}
-	//for _, m := range r.meshes {
-	//	m.Draw(r.artist, view, projection)
-	//}
 
 	for _, g := range r.groups {
 		r.artist.DrawMeshGroup(g, view, projection)
@@ -96,24 +94,24 @@ func (r *Renderer) NewMeshGroup() (*primitives.MeshGroup, error) {
 	}
 	mg := &primitives.MeshGroup{}
 	var (
-	mArgs = []ogl.ProgramArg{
-		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
-		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
-		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
-		{Name: ogl.UColorName, Typ: ogl.Vec4Uniform, Dst: ogl.ColorDst},
+	mArgs = []program.Arg{
+		{Name: program.UModelName, Typ: program.Mat4Uniform, Dst: program.ModelDst},
+		{Name: program.UViewName, Typ: program.Mat4Uniform, Dst: program.ViewDst},
+		{Name: program.UProjectionName, Typ: program.Mat4Uniform, Dst: program.ProjectionDst},
+		{Name: program.UColorName, Typ: program.Vec4Uniform, Dst: program.ColorDst},
 	}
-	lArgs = []ogl.ProgramArg {
-		{Name: ogl.ULightColorName, Typ: ogl.Vec3Uniform, Dst: ogl.LightColorDst},
-		{Name: ogl.ULightPositionName, Typ: ogl.Vec3Uniform, Dst: ogl.LightPosDst},
+	lArgs = []program.Arg {
+		{Name: program.ULightColorName, Typ: program.Vec3Uniform, Dst: program.LightColorDst},
+		{Name: program.ULightPositionName, Typ: program.Vec3Uniform, Dst: program.LightPosDst},
 	}
 	)
-	mUniforms := ogl.NewUniforms(r.dev, p, mArgs)
-	lUniforms := ogl.NewUniforms(r.dev, p, lArgs)
-	mg.GPUPack   = ogl.ProgramPack{
+	mUniforms := program.NewUniforms(r.dev, p, mArgs)
+	lUniforms := program.NewUniforms(r.dev, p, lArgs)
+	mg.GPUPack   = program.Pack{
 		ID:       p,
-		Uniforms: map[ogl.UniformCat][]ogl.Uniform{
-			ogl.UCMesh: mUniforms,
-			ogl.UCLight: lUniforms,
+		Uniforms: map[program.UniformCat][]program.Uniform{
+			program.UCMesh: mUniforms,
+			program.UCLight: lUniforms,
 		},
 	}
 
@@ -143,16 +141,16 @@ func (r *Renderer) LoadMeshFromFile(filepath string) (*primitives.Mesh, error) {
 		return nil, err
 	}
 
-	var args = []ogl.ProgramArg{
-		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
-		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
-		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
-		{Name: ogl.ULightColorName, Typ: ogl.Vec3Uniform, Dst: ogl.LightColorDst},
-		{Name: ogl.ULightPositionName, Typ: ogl.Vec3Uniform, Dst: ogl.LightPosDst},
-		{Name: ogl.UColorName, Typ: ogl.Vec4Uniform, Dst: ogl.ColorDst},
+	var args = []program.Arg{
+		{Name: program.UModelName, Typ: program.Mat4Uniform, Dst: program.ModelDst},
+		{Name: program.UViewName, Typ: program.Mat4Uniform, Dst: program.ViewDst},
+		{Name: program.UProjectionName, Typ: program.Mat4Uniform, Dst: program.ProjectionDst},
+		{Name: program.ULightColorName, Typ: program.Vec3Uniform, Dst: program.LightColorDst},
+		{Name: program.ULightPositionName, Typ: program.Vec3Uniform, Dst: program.LightPosDst},
+		{Name: program.UColorName, Typ: program.Vec4Uniform, Dst: program.ColorDst},
 	}
 
-	uniforms := ogl.NewUniforms(r.dev, p, args)
+	uniforms := program.NewUniforms(r.dev, p, args)
 	oglMesh := ogl.NewMesh(r.dev, p, uniforms)
 
 	model, err := resources.Load3ModelObj(filepath)
@@ -201,66 +199,4 @@ func (r *Renderer) NewTex(img image.Image) uint32 {
 
 func (r *Renderer) DelTex(id uint32) {
 
-}
-
-func loadFromV3f(dev general.Device, data interface{}, indices []uint32) (*primitives.Mesh, error) {
-	const (
-		defaultVert = "assets/programs/test.vert"
-		defaultFrag = "assets/programs/test.frag"
-	)
-
-	p, err := dev.CompileProgram(defaultVert, defaultFrag)
-	if err != nil {
-		return nil, err
-	}
-
-	var args = []ogl.ProgramArg{
-		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
-		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
-		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
-	}
-
-	uniforms := ogl.NewUniforms(dev, p, args)
-	oglMesh := ogl.NewMesh(dev, p, uniforms)
-
-	content, converted := data.([]ogl.V3f)
-	if !converted {
-		return nil, errors.New("data type does not match to v3f type")
-	}
-
-	oglMesh.Load(dev, content, indices)
-	n := primitives.NewNode()
-	m := primitives.NewMesh(n, oglMesh)
-	return m, nil
-}
-
-func loadFromV3fC4b(dev general.Device, data interface{}, indices []uint32) (*primitives.Mesh, error) {
-	const (
-		defaultVert = "assets/programs/col.vert"
-		defaultFrag = "assets/programs/col.frag"
-	)
-
-	p, err := dev.CompileProgram(defaultVert, defaultFrag)
-	if err != nil {
-		return nil, err
-	}
-
-	var args = []ogl.ProgramArg{
-		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
-		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
-		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
-	}
-
-	uniforms := ogl.NewUniforms(dev, p, args)
-	oglMesh := ogl.NewMesh(dev, p, uniforms)
-
-	content, converted := data.([]ogl.V3fC4b)
-	if !converted {
-		return nil, errors.New("data type does not match to v3f type")
-	}
-
-	oglMesh.Load(dev, content, indices)
-	n := primitives.NewNode()
-	m := primitives.NewMesh(n, oglMesh)
-	return m, nil
 }

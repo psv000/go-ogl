@@ -1,5 +1,10 @@
 package ogl
 
+import (
+	"framework/graphics/program"
+	"framework/graphics/utils"
+)
+
 type (
 	// Queue ...
 	Queue struct {
@@ -45,17 +50,17 @@ func (q *Queue) Process() {
 			return
 		case ApplyProgramCmd:
 			program, ok := cmd.Args.(uint32)
-			checkConversion(ok)
+			utils.CheckConversion(ok)
 			q.oglDevice.ApplyProgram(program)
 		case ApplyUniformsCmd:
-			uni, ok := cmd.Args.([]Uniform)
-			checkConversion(ok)
+			uni, ok := cmd.Args.([]program.Uniform)
+			utils.CheckConversion(ok)
 			for _, u := range uni {
 				q.oglDevice.ApplyUniform(u)
 			}
 		case DrawMeshCmd:
 			drawArgs, ok := cmd.Args.(DrawArgs)
-			checkConversion(ok)
+			utils.CheckConversion(ok)
 			q.oglDevice.Draw(drawArgs.Vao, drawArgs.IndLen)
 		case ClearContextCmd:
 			q.oglDevice.ClrScr()

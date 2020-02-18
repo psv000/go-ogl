@@ -1,6 +1,8 @@
 package ogl
 
 import (
+	"framework/graphics/program"
+	"framework/graphics/utils"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -67,54 +69,54 @@ func (ogl *OpenGL) CompileProgram(vertex, fragment string) (uint32, error) {
 }
 
 // CreateUniforms ...
-func (ogl *OpenGL) CreateUniforms(programID uint32, args []ProgramArg) []Uniform {
-	var uniforms []Uniform
+func (ogl *OpenGL) CreateUniforms(programID uint32, args []program.Arg) []program.Uniform {
+	var uniforms []program.Uniform
 	for _, arg := range args {
 		loc := gl.GetUniformLocation(programID, gl.Str(arg.Name+strTerminator))
-		uniforms = append(uniforms, Uniform{
-			loc: loc,
-			dst: arg.Dst,
-			typ: arg.Typ,
+		uniforms = append(uniforms, program.Uniform{
+			Loc: loc,
+			Dst: arg.Dst,
+			Typ: arg.Typ,
 		})
 	}
 	return uniforms
 }
 
 // ApplyProgram ...
-func (ogl *OpenGL) ApplyUniform(u Uniform) {
+func (ogl *OpenGL) ApplyUniform(u program.Uniform) {
 	loc, typ := u.Unpack()
 	switch typ {
-	case FltUniform:
+	case program.FltUniform:
 		val := u.ArgFlt()
 		gl.Uniform1f(loc, float32(val))
-	case IntUniform:
+	case program.IntUniform:
 		val := u.ArgInt()
 		gl.Uniform1i(loc, int32(val))
-	case Vec2Uniform:
+	case program.Vec2Uniform:
 		val := u.ArgV2()
 		v1, v2 := val[0], val[1]
 		gl.Uniform2f(loc, v1, v2)
-	case Vec3Uniform:
+	case program.Vec3Uniform:
 		val := u.ArgV3()
 		v1, v2, v3 := val[0], val[1], val[2]
 		gl.Uniform3f(loc, v1, v2, v3)
-	case Vec4Uniform:
+	case program.Vec4Uniform:
 		val := u.ArgV4()
 		v1, v2, v3, v4 := val[0], val[1], val[2], val[3]
 		gl.Uniform4f(loc, v1, v2, v3, v4)
-	case Mat4Uniform:
+	case program.Mat4Uniform:
 		const matValCount = 16
 		val := u.ArgM4()
 		var glMat [matValCount]float32
 		for i, v := range val.Values() {
 			glMat[i] = v
 		}
-		gl.UniformMatrix4fv(u.loc, 1, false, &glMat[0])
-	case Tex2DUniform:
-		val := u.ArgTex2D()
-		gl.ActiveTexture(gl.TEXTURE0 + uint32(val.lev))
-		gl.BindTexture(gl.TEXTURE_2D, val.id)
-		gl.Uniform1i(u.loc, val.lev)
+		gl.UniformMatrix4fv(u.Loc, 1, false, &glMat[0])
+	//case program.Tex2DUniform:
+	//	val := u.ArgTex2D()
+	//	gl.ActiveTexture(gl.TEXTURE0 + uint32(val.lev))
+	//	gl.BindTexture(gl.TEXTURE_2D, val.id)
+	//	gl.Uniform1i(u.Loc, val.lev)
 	}
 }
 
@@ -163,14 +165,14 @@ func (ogl *OpenGL) DelIBO(ibo uint32) {
 func (ogl *OpenGL) UpdVBO(vbo uint32, data interface{}, size int) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, size, gl.Ptr(data), gl.STATIC_DRAW)
-	checkOGLError()
+	utils.CheckOGLError()
 }
 
 // UpdIBO ...
 func (ogl *OpenGL) UpdIBO(ibo uint32, indices []uint32) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, UInt32Size*len(indices), gl.Ptr(indices), gl.STATIC_DRAW)
-	checkOGLError()
+	utils.CheckOGLError()
 }
 
 // UpdVAO ...
@@ -219,7 +221,7 @@ func (ogl *OpenGL) UpdVAO(vao, vbo, ibo uint32, opts []VertexAttrOpt) {
 
 		gl.VertexAttribPointer(uint32(opt.attr), opt.size, typ, norm, stride, gl.PtrOffset(optOffset))
 		gl.EnableVertexAttribArray(uint32(opt.attr))
-		checkOGLError()
+		utils.CheckOGLError()
 	}
 
 	if ibo != 0 {

@@ -6,7 +6,7 @@ type (
 		LoadMeshFromFile(filepath string) (*Mesh, error)
 		LoadMeshFromData(data interface{}, indices []uint32) (*Mesh, error)
 
-		NewMeshGroup(vert, frag string) *MeshGroup
+		NewMeshGroup() (*MeshGroup, error)
 		DelMeshGroup(mg *MeshGroup)
 	}
 )
