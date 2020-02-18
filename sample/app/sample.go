@@ -7,32 +7,10 @@ import (
 
 	"framework/core"
 	"framework/graphics/materials"
-	"framework/graphics/ogl"
 	"framework/graphics/primitives"
 	"framework/graphics/scene"
 	"github.com/sirupsen/logrus"
 )
-
-var vertices = []ogl.V3fC4b{
-	{[3]float32{-0.25, -0.25, -0.25}, [4]uint8{255, 0, 0, 255}},
-	{[3]float32{0.25, -0.25, -0.25}, [4]uint8{0, 255, 0, 255}},
-	{[3]float32{0.25, 0.25, -0.25}, [4]uint8{167, 76, 54, 255}},
-	{[3]float32{-0.25, 0.25, -0.25}, [4]uint8{128, 187, 35, 255}},
-
-	{[3]float32{-0.25, -0.25, 0.25}, [4]uint8{200, 21, 127, 255}},
-	{[3]float32{0.25, -0.25, 0.25}, [4]uint8{31, 98, 0, 255}},
-	{[3]float32{0.25, 0.25, 0.25}, [4]uint8{0, 128, 78, 255}},
-	{[3]float32{-0.25, 0.25, 0.25}, [4]uint8{128, 0, 128, 255}},
-}
-
-var indices = []uint32{
-	0, 1, 2, 0, 2, 3,
-	1, 5, 6, 1, 6, 2,
-	0, 1, 5, 0, 5, 4,
-	0, 3, 7, 0, 7, 4,
-	3, 2, 6, 3, 6, 7,
-	4, 5, 6, 4, 6, 7,
-}
 
 type (
 	// Sample ...
@@ -45,16 +23,18 @@ type (
 		cam              *scene.Camera
 		xcam, ycam, zcam float64
 
+		xl, yl, zl float32
+
 		mg *primitives.MeshGroup
-		mesh *primitives.Mesh
+		light, cube, monkey *primitives.Mesh
 	}
 )
 
 // NewSample ...
 func NewSample() *Sample {
 	return &Sample{
-		//xcam: -400,
-		//ycam: -300,
+		xcam: -3,
+		ycam: -3,
 		zcam: -10.,
 	}
 }
@@ -83,24 +63,41 @@ func (s *Sample) Start(sp core.ServicePack) {
 	s.set.SetCamera(s.cam)
 
 	s.cam.Relocate(s.xcam, s.ycam, s.zcam)
-	//s.cam.Rotation(rad(90.), rad(90.), 0.)
+
+	s.xl, s.yl, s.zl = -1.5, 0, 0
 
 	var err error
-	//s.mesh, err = s.pl.LoadMeshFromData(vertices, indices)
-	s.mesh, err = s.pl.LoadMeshFromFile("assets/models/monkey-head.obj")
+	s.light, err = s.pl.LoadMeshFromFile("assets/models/cube.obj")
 	if err != nil {
 		logrus.Panic(err)
 	}
-	s.mesh.SetColor(mth.Vec4f32{0., 1., 0., 1.})
-	//s.mesh.Node().Rotate(rad(45.), 0., 0.)
+	s.light.Node().Locate(float64(s.xl), float64(s.yl), float64(s.zl))
+	s.light.Node().Resize(6, 6, 6)
+	s.light.Node().Scale(0.2, 0.2, 0.2)
+
+	s.cube, err = s.pl.LoadMeshFromFile("assets/models/cube.obj")
+	if err != nil {
+		logrus.Panic(err)
+	}
+	s.cube.SetColor(mth.Vec4f32{1., 0., 0, 1.})
+	s.cube.Node().Locate(1.8, 1.2, 2.1)
+
+	s.monkey, err = s.pl.LoadMeshFromFile("assets/models/monkey-head.obj")
+	if err != nil {
+		logrus.Panic(err)
+	}
+	s.monkey.SetColor(mth.Vec4f32{0., 1., 0., 1.})
 
 	s.mg, err = s.pl.NewMeshGroup()
 	if err != nil {
 		logrus.Panic(err)
 	}
-	s.mg.Meshes = append(s.mg.Meshes, s.mesh)
+	s.mg.Meshes = append(s.mg.Meshes, s.monkey)
+	s.mg.Meshes = append(s.mg.Meshes, s.cube)
+	s.mg.Meshes = append(s.mg.Meshes, s.light)
+
 	s.mg.LightSources = append(s.mg.LightSources, primitives.LightSource{
-		Pos: mth.Vec3f32{0.,0.,0.},
+		Pos: mth.Vec3f32{s.xl, s.yl, s.zl},
 		Col: mth.Vec3f32{1., 1., 1.},
 	})
 }
@@ -108,6 +105,7 @@ func (s *Sample) Start(sp core.ServicePack) {
 // ResizeView ...
 func (s *Sample) ResizeView(w, h int) {
 	s.cam.SetView(w, h).Relocate(s.xcam, s.ycam, s.zcam)
+	s.cam.Rotation(rad(-5), rad(8), 0)
 }
 
 var ms float64
@@ -126,14 +124,17 @@ func (s *Sample) Update(dt time.Duration) {
 
 	var px, py, pz float64
 	px = math.Sin(ms*100.)*0.5 - 0.5
+	py = math.Sin(ms*100.)*0.5 - 0.5
+	pz = math.Sin(ms*100.)*0.5 - 2.1
 
 	_, _, _ = x, y, z
 	_, _, _ = sx, sy, sz
 	_, _, _ = px, py, pz
 
-	s.mesh.Node().Rotate(x, y, z)
-	//s.mesh.Node().Scale(sx, sy, sz)
-	s.mesh.Node().Locate(px, py, pz)
+	s.cube.Node().Rotate(x, y, z)
+	s.cube.Node().Locate(1.8, 1.2, pz)
+	s.monkey.Node().Locate(0, py, 0)
+
 }
 
 func rad(x float64) float64 {

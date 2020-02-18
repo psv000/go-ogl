@@ -65,9 +65,11 @@ func (c *Camera) Relocate(x, y, z float64) *Camera {
 
 // Magnification ...
 func (c *Camera) Magnification(m float64) *Camera {
-	c.view.Set(0, 0, m).
+	scaling := mth.NewUnitMat4f()
+	scaling.Set(0, 0, m).
 		Set(1, 1, m).
 		Set(2, 2, m)
+	c.view.Mult(scaling)
 	return c
 }
 

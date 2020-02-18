@@ -122,11 +122,9 @@ func relocate(m mth.Mat4f,
 	ax, ay, az float64, // anchor point
 	ppx, ppy, ppz float64, // pivot point
 	factor float64) mth.Mat4f { // scale factor
-	//m.Set(3, 1, factor*(y-cy*sy*ay+pcy*ppy)).
-	//	Set(3, 0, factor*(x-cx*sx*ax+pcx*ppx)).
-	//	Set(3, 2, factor*(z-cz*sz*az+pcz*ppz))
-
-	m.Set(3, 0, x).Set(3, 1, y).Set(3, 2, z)
+	m.Set(3, 1, factor*(y-cy*sy*ay+pcy*ppy)).
+		Set(3, 0, factor*(x-cx*sx*ax+pcx*ppx)).
+		Set(3, 2, factor*(z-cz*sz*az+pcz*ppz))
 	return m
 }
 
