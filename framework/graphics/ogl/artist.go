@@ -1,8 +1,9 @@
 package ogl
 
 import (
-	"framework/graphics"
+	"framework/graphics/primitives"
 	"framework/mth"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -64,7 +65,9 @@ func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f,
 }
 
 // DrawMeshGroup ...
-func (a *Artist) DrawMeshGroup(group graphics.MeshGroup, view, projection mth.Mat4f){
+func (a *Artist) DrawMeshGroup(data interface{}, view, projection mth.Mat4f){
+	group, ok := data.(*primitives.MeshGroup)
+	checkConversion(ok)
 
 	lu := group.GPUPack.Uniforms[UCLight]
 	lm := group.GPUPack.Uniforms[UCMesh]

@@ -1,8 +1,9 @@
 package ogl
 
 import (
-	"github.com/sirupsen/logrus"
 	"runtime"
+
+	"github.com/sirupsen/logrus"
 )
 
 type (

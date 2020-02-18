@@ -1,15 +1,14 @@
-package graphics
+package primitives
 
 import (
 	"framework/graphics/ogl"
-	"framework/graphics/primitives"
 )
 
 type (
 	// MeshGroup ...
 	MeshGroup struct {
 		// Meshes ...
-		Meshes []*primitives.Mesh
+		Meshes []*Mesh
 		// LightSources ...
 		LightSources []LightSource
 		// GPUPack ...

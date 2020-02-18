@@ -24,7 +24,7 @@ type (
 
 		camera *scene.Camera
 
-		groups []*MeshGroup
+		groups []*primitives.MeshGroup
 	}
 )
 
@@ -89,12 +89,12 @@ func (r *Renderer) Update() {
 }
 
 // NewMeshGroup ...
-func (r *Renderer) NewMeshGroup() (*MeshGroup, error) {
+func (r *Renderer) NewMeshGroup() (*primitives.MeshGroup, error) {
 	p, err := r.dev.CompileProgram("assets/programs/lighting.vert", "assets/programs/lighting.frag")
 	if err != nil {
 		return nil, err
 	}
-	mg := &MeshGroup{}
+	mg := &primitives.MeshGroup{}
 	var (
 	mArgs = []ogl.ProgramArg{
 		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
@@ -122,7 +122,7 @@ func (r *Renderer) NewMeshGroup() (*MeshGroup, error) {
 }
 
 // DelMeshGroup ...
-func (r *Renderer) DelMeshGroup(mg *MeshGroup) {
+func (r *Renderer) DelMeshGroup(mg *primitives.MeshGroup) {
 	var toDel int = -1
 	for i, ptr := range r.groups {
 		if ptr == mg {

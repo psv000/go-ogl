@@ -1,9 +1,7 @@
 package ogl
 
 import (
-	"framework/graphics/general"
 	"framework/mth"
-	"github.com/sirupsen/logrus"
 )
 
 type (
@@ -17,11 +15,7 @@ type (
 )
 
 // NewUniform ...
-func NewUniforms(device general.Device, programID uint32, args []ProgramArg) []Uniform {
-	oglDevice, converted := device.(*OpenGL)
-	if !converted {
-		logrus.Panic(openGLDeviceInfoTag + ": invalid ogl device")
-	}
+func NewUniforms(oglDevice *OpenGL, programID uint32, args []ProgramArg) []Uniform {
 	return oglDevice.CreateUniforms(programID, args)
 }
 

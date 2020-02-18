@@ -1,8 +1,9 @@
 package ogl
 
 import (
-	"framework/mth"
 	"unsafe"
+
+	"framework/mth"
 )
 
 type (

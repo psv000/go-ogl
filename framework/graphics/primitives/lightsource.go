@@ -1,4 +1,4 @@
-package graphics
+package primitives
 
 import "framework/mth"
 

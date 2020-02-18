@@ -1,7 +1,6 @@
 package primitives
 
 import (
-	"framework/graphics/general"
 	"framework/mth"
 )
 
@@ -18,11 +17,6 @@ type (
 // NewMesh ...
 func NewMesh(node *Node, back interface{}) *Mesh {
 	return &Mesh{node: node, back: back, color: mth.Vec4f32{1., 1., 1., 1.}}
-}
-
-// Draw ...
-func (m *Mesh) Draw(qa general.Artist, view, projection mth.Mat4f) {
-	qa.DrawMesh(m.back, m.node.Update(), view, projection, m.color)
 }
 
 // Gl ...
