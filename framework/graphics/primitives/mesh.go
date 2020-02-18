@@ -21,8 +21,8 @@ func NewMesh(node *Node, back interface{}) *Mesh {
 }
 
 // Draw ...
-func (m *Mesh) Draw(qa general.Artist, t mth.Mat4f) {
-	qa.DrawMesh(m.back, m.node.Update(t), m.color)
+func (m *Mesh) Draw(qa general.Artist, view, projection mth.Mat4f) {
+	qa.DrawMesh(m.back, m.node.Update(), view, projection, m.color)
 }
 
 // Node ...

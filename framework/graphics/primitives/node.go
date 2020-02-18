@@ -83,7 +83,7 @@ func (n *Node) ParentSize(x, y, z float64) {
 }
 
 // Update ...
-func (n *Node) Update(t mth.Mat4f) mth.Mat4f {
+func (n *Node) Update() mth.Mat4f {
 	xpos := n.px
 	ypos := n.py
 	zpos := n.pz
@@ -111,7 +111,7 @@ func (n *Node) Update(t mth.Mat4f) mth.Mat4f {
 		n.ppx, n.ppy, n.ppz,
 		n.scaleFactor)
 
-	return m.Mult(t)
+	return m
 }
 
 func relocate(m mth.Mat4f,

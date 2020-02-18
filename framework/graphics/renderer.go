@@ -71,12 +71,13 @@ func (r *Renderer) ResizeView(w, h int) {
 // Update ...
 func (r *Renderer) Update() {
 	r.artist.ClearScreen()
-	var t = unitMat
+
+	var view, projection = unitMat, unitMat
 	if r.camera != nil {
-		t = r.camera.View().Mult(r.camera.Projection())
+		view, projection = r.camera.View(), r.camera.Projection()
 	}
 	for _, m := range r.meshes {
-		m.Draw(r.artist, t)
+		m.Draw(r.artist, view, projection)
 	}
 
 	r.queue.Process()
@@ -85,14 +86,18 @@ func (r *Renderer) Update() {
 
 // LoadMesh ...
 func (r *Renderer) LoadMeshFromFile(filepath string) (*primitives.Mesh, error) {
-	p, err := r.dev.CompileProgram("assets/programs/uv.vert", "assets/programs/uv.frag")
+	p, err := r.dev.CompileProgram("assets/programs/lighting.vert", "assets/programs/lighting.frag")
 	if err != nil {
 		return nil, err
 	}
 
 	var args = []ogl.ProgramArg{
-		{Name: ogl.UTransformNameDefault, Typ: ogl.Mat4Uniform, Dst: ogl.MVPDst},
-		{Name: ogl.UColorNameDefault, Typ: ogl.Vec4Uniform, Dst: ogl.ColorDst},
+		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
+		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
+		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
+		{Name: ogl.ULightColorName, Typ: ogl.Vec3Uniform, Dst: ogl.LightColorDst},
+		{Name: ogl.ULightPositionName, Typ: ogl.Vec3Uniform, Dst: ogl.LightPosDst},
+		{Name: ogl.UColorName, Typ: ogl.Vec4Uniform, Dst: ogl.ColorDst},
 	}
 
 	uniforms := ogl.NewUniforms(r.dev, p, args)
@@ -161,7 +166,9 @@ func loadFromV3f(dev general.Device, data interface{}, indices []uint32) (*primi
 	}
 
 	var args = []ogl.ProgramArg{
-		{Name: ogl.UTransformNameDefault, Typ: ogl.Mat4Uniform, Dst: ogl.MVPDst},
+		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
+		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
+		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
 	}
 
 	uniforms := ogl.NewUniforms(dev, p, args)
@@ -190,7 +197,9 @@ func loadFromV3fC4b(dev general.Device, data interface{}, indices []uint32) (*pr
 	}
 
 	var args = []ogl.ProgramArg{
-		{Name: ogl.UTransformNameDefault, Typ: ogl.Mat4Uniform, Dst: ogl.MVPDst},
+		{Name: ogl.UModelName, Typ: ogl.Mat4Uniform, Dst: ogl.ModelDst},
+		{Name: ogl.UViewName, Typ: ogl.Mat4Uniform, Dst: ogl.ViewDst},
+		{Name: ogl.UProjectionName, Typ: ogl.Mat4Uniform, Dst: ogl.ProjectionDst},
 	}
 
 	uniforms := ogl.NewUniforms(dev, p, args)

@@ -66,13 +66,27 @@ const (
 const (
 	// UnkDst ...
 	UnkDst Destination = iota
-	// MVPDst ...
-	MVPDst
+	// ModelDst ...
+	ModelDst
+	// ViewDst ...
+	ViewDst
+	// ProjectionDst ...
+	ProjectionDst
 	// ColorDst ...
 	ColorDst
+	// LightPosDst ...
+	LightPosDst
+	// LightColor ...
+	LightColorDst
 )
 
 const (
-	UTransformNameDefault = "uModelViewProjection"
-	UColorNameDefault     = "uColor"
+	UModelName = "uModel"
+	UViewName = "uView"
+	UProjectionName = "uProjection"
+
+	ULightPositionName = "uLightPos"
+	ULightColorName = "uLightColor"
+
+	UColorName     = "uColor"
 )

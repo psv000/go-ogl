@@ -92,22 +92,22 @@ func (ogl *OpenGL) ApplyUniform(u Uniform) {
 		gl.Uniform1i(loc, int32(val))
 	case Vec2Uniform:
 		val := u.ArgV2()
-		v1, v2 := float32(val[0]), float32(val[1])
+		v1, v2 := val[0], val[1]
 		gl.Uniform2f(loc, v1, v2)
 	case Vec3Uniform:
 		val := u.ArgV3()
-		v1, v2, v3 := float32(val[0]), float32(val[1]), float32(val[2])
+		v1, v2, v3 := val[0], val[1], val[2]
 		gl.Uniform3f(loc, v1, v2, v3)
 	case Vec4Uniform:
 		val := u.ArgV4()
-		v1, v2, v3, v4 := float32(val[0]), float32(val[1]), float32(val[2]), float32(val[3])
+		v1, v2, v3, v4 := val[0], val[1], val[2], val[3]
 		gl.Uniform4f(loc, v1, v2, v3, v4)
 	case Mat4Uniform:
 		const matValCount = 16
 		val := u.ArgM4()
 		var glMat [matValCount]float32
 		for i, v := range val.Values() {
-			glMat[i] = float32(v)
+			glMat[i] = v
 		}
 		gl.UniformMatrix4fv(u.loc, 1, false, &glMat[0])
 	case Tex2DUniform:

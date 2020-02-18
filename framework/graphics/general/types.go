@@ -1,11 +1,16 @@
 package general
 
-import "framework/mth"
+import (
+	"framework/mth"
+
+	"framework/graphics/primitives"
+)
 
 type (
 	// Mesh ...
 	Mesh interface {
 		Load(device interface{}, content interface{}, indices []uint32)
-		Update(t mth.Mat4f) mth.Mat4f
+		Update() mth.Mat4f
+		Node() *primitives.Node
 	}
 )

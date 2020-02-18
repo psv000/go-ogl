@@ -1,6 +1,7 @@
 package app
 
 import (
+	"framework/mth"
 	"math"
 	"time"
 
@@ -85,13 +86,12 @@ func (s *Sample) Start(sp core.ServicePack) {
 
 	var err error
 	//s.mesh, err = s.pl.LoadMeshFromData(vertices, indices)
-	//s.mesh.SetColor(mth.Vec4f32{0., 1., 0., 1.})
 	s.mesh, err = s.pl.LoadMeshFromFile("assets/models/monkey-head.obj")
-	//s.mesh.Node().Rotate(rad(45.), 0., 0.)
-
 	if err != nil {
 		logrus.Panic(err)
 	}
+	s.mesh.SetColor(mth.Vec4f32{0., 1., 0., 1.})
+	//s.mesh.Node().Rotate(rad(45.), 0., 0.)
 }
 
 // ResizeView ...
@@ -105,16 +105,16 @@ var ms float64
 func (s *Sample) Update(dt time.Duration) {
 	ms += 0.00016
 	var x, y, z float64
-	x = (math.Sin(ms*100.) + math.Cos(ms*100.)) * 2.
+	//x = (math.Sin(ms*100.) + math.Cos(ms*100.)) * 2.
 	y = (math.Sin(ms*50.) + math.Cos(ms*50.)) * 2.
-	x = (math.Sin(ms*25.) + math.Cos(ms*25.)) * 2.
+	//z = (math.Sin(ms*25.) + math.Cos(ms*25.)) * 2.
 
 	var sx, sy, sz = 1., 1., 1.
 	sc := math.Sin(ms*100.)/2. + 2
 	sx, sy, sz = sc, sc, sc
 
 	var px, py, pz float64
-	px = math.Sin(ms*100.) * 0.5
+	px = math.Sin(ms*100.) * 0.5 - 0.5
 
 	_, _, _ = x, y, z
 	_, _, _ = sx, sy, sz
