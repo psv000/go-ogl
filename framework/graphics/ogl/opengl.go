@@ -1,6 +1,7 @@
 package ogl
 
 import (
+	"framework/graphics/general"
 	"framework/graphics/program"
 	"framework/graphics/utils"
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -112,11 +113,11 @@ func (ogl *OpenGL) ApplyUniform(u program.Uniform) {
 			glMat[i] = v
 		}
 		gl.UniformMatrix4fv(u.Loc, 1, false, &glMat[0])
-	//case program.Tex2DUniform:
-	//	val := u.ArgTex2D()
-	//	gl.ActiveTexture(gl.TEXTURE0 + uint32(val.lev))
-	//	gl.BindTexture(gl.TEXTURE_2D, val.id)
-	//	gl.Uniform1i(u.Loc, val.lev)
+		//case program.Tex2DUniform:
+		//	val := u.ArgTex2D()
+		//	gl.ActiveTexture(gl.TEXTURE0 + uint32(val.lev))
+		//	gl.BindTexture(gl.TEXTURE_2D, val.id)
+		//	gl.Uniform1i(u.Loc, val.lev)
 	}
 }
 
@@ -230,7 +231,7 @@ func (ogl *OpenGL) UpdVAO(vao, vbo, ibo uint32, opts []VertexAttrOpt) {
 }
 
 // NewTex ...
-func (ogl *OpenGL) NewTex() uint32 {
+func (ogl *OpenGL) NewTex() Tex2D {
 	var id uint32
 	gl.GenTextures(1, &id)
 	gl.BindTexture(gl.TEXTURE_2D, id)
@@ -239,25 +240,25 @@ func (ogl *OpenGL) NewTex() uint32 {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
-	return id
+	return Tex2D{id: id}
 }
 
 // UpdTex ...
-func (ogl *OpenGL) UpdTex(id uint32, level, glInternal, width, height, border int32, glFormat, xtype uint32, data interface{}) {
-	gl.BindTexture(gl.TEXTURE_2D, id)
+func (ogl *OpenGL) UpdTex(tex Tex2D, level, width, height, border int32, data interface{}) {
+	gl.BindTexture(gl.TEXTURE_2D, tex.id)
 	gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
 	gl.TexImage2D(gl.TEXTURE_2D,
 		level,
-		glInternal,
+		tex.internalFormat,
 		width, height, border,
-		glFormat, xtype,
+		tex.format, tex.dataType,
 		gl.Ptr(data.(uint8))) // nolint: govet
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
 // DelTex ...
-func (ogl *OpenGL) DelTex(id uint32) {
-	gl.DeleteTextures(1, &id)
+func (ogl *OpenGL) DelTex(tex Tex2D) {
+	gl.DeleteTextures(1, &tex.id)
 }
 
 // Draw ...
@@ -271,4 +272,9 @@ func (ogl *OpenGL) Draw(vao uint32, indLen int32) {
 func (ogl *OpenGL) DrawArray(vao uint32, dataLen int32) {
 	gl.BindVertexArray(vao)
 	gl.DrawArrays(gl.TRIANGLES, 0, dataLen)
+}
+
+// NewTexLoader ...
+func (ogl *OpenGL) NewTexLoader() general.GlTexLoader {
+	return &OGLTexLoader{}
 }

@@ -6,7 +6,6 @@ import (
 )
 
 type (
-
 	uniformFabric interface {
 		CreateUniforms(programID uint32, args []Arg) []Uniform
 	}

@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"framework/graphics/program"
+	"framework/graphics/textures"
 	"framework/mth"
 	"framework/resources"
 	"image"
@@ -24,6 +25,8 @@ type (
 		artist general.Artist
 
 		camera *scene.Camera
+
+		tl general.GlTexLoader
 
 		groups []*primitives.MeshGroup
 	}
@@ -53,6 +56,8 @@ func (r *Renderer) Serve(args ...interface{}) error {
 	if err := r.dev.Init(); err != nil {
 		return errors.Wrap(err, rendererInfoTag)
 	}
+
+	r.tl = r.dev.NewTexLoader()
 
 	logrus.Info("renderer started")
 	return nil
@@ -94,23 +99,23 @@ func (r *Renderer) NewMeshGroup() (*primitives.MeshGroup, error) {
 	}
 	mg := &primitives.MeshGroup{}
 	var (
-	mArgs = []program.Arg{
-		{Name: program.UModelName, Typ: program.Mat4Uniform, Dst: program.ModelDst},
-		{Name: program.UViewName, Typ: program.Mat4Uniform, Dst: program.ViewDst},
-		{Name: program.UProjectionName, Typ: program.Mat4Uniform, Dst: program.ProjectionDst},
-		{Name: program.UColorName, Typ: program.Vec4Uniform, Dst: program.ColorDst},
-	}
-	lArgs = []program.Arg {
-		{Name: program.ULightColorName, Typ: program.Vec3Uniform, Dst: program.LightColorDst},
-		{Name: program.ULightPositionName, Typ: program.Vec3Uniform, Dst: program.LightPosDst},
-	}
+		mArgs = []program.Arg{
+			{Name: program.UModelName, Typ: program.Mat4Uniform, Dst: program.ModelDst},
+			{Name: program.UViewName, Typ: program.Mat4Uniform, Dst: program.ViewDst},
+			{Name: program.UProjectionName, Typ: program.Mat4Uniform, Dst: program.ProjectionDst},
+			{Name: program.UColorName, Typ: program.Vec4Uniform, Dst: program.ColorDst},
+		}
+		lArgs = []program.Arg{
+			{Name: program.ULightColorName, Typ: program.Vec3Uniform, Dst: program.LightColorDst},
+			{Name: program.ULightPositionName, Typ: program.Vec3Uniform, Dst: program.LightPosDst},
+		}
 	)
 	mUniforms := program.NewUniforms(r.dev, p, mArgs)
 	lUniforms := program.NewUniforms(r.dev, p, lArgs)
-	mg.GPUPack   = program.Pack{
-		ID:       p,
+	mg.GPUPack = program.Pack{
+		ID: p,
 		Uniforms: map[program.UniformCat][]program.Uniform{
-			program.UCMesh: mUniforms,
+			program.UCMesh:  mUniforms,
 			program.UCLight: lUniforms,
 		},
 	}
@@ -193,10 +198,12 @@ func (r *Renderer) SetCamera(c *scene.Camera) {
 }
 
 // NewTex ...
-func (r *Renderer) NewTex(img image.Image) uint32 {
-	return 0
+func (r *Renderer) NewTex(img image.Image) textures.Texture {
+	tex := r.tl.NewTex(r.dev)
+	r.tl.GlLoad(tex, img, r.dev)
+	return tex
 }
 
-func (r *Renderer) DelTex(id uint32) {
-
+func (r *Renderer) DelTex(tex textures.Texture) {
+	r.tl.DelTex(tex, r.dev)
 }

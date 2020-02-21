@@ -1,5 +1,7 @@
 package materials
 
+import "framework/graphics/textures"
+
 type (
 	// MaterialMap ...
 	MaterialMap struct {
@@ -20,8 +22,8 @@ type (
 	Material struct {
 		// ID ...
 		ID string
-		// TexID ...
-		TexID uint32
+		// Texture ...
+		Texture textures.Texture
 		// X Y Z W ...
 		X, Y, Z, W float64
 	}

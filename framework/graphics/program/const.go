@@ -37,14 +37,14 @@ const (
 )
 
 const (
-	UModelName = "uModel"
-	UViewName = "uView"
+	UModelName      = "uModel"
+	UViewName       = "uView"
 	UProjectionName = "uProjection"
 
 	ULightPositionName = "uLightPos"
-	ULightColorName = "uLightColor"
+	ULightColorName    = "uLightColor"
 
-	UColorName     = "uColor"
+	UColorName = "uColor"
 )
 
 const (

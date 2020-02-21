@@ -1,6 +1,8 @@
 package general
 
-import "framework/graphics/program"
+import (
+	"framework/graphics/program"
+)
 
 type (
 	// Device ...
@@ -8,5 +10,7 @@ type (
 		Init() error
 		CompileProgram(vertex, fragment string) (uint32, error)
 		CreateUniforms(programID uint32, args []program.Arg) []program.Uniform
+
+		NewTexLoader() GlTexLoader
 	}
 )

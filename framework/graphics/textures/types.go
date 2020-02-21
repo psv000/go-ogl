@@ -1,19 +1,14 @@
-package materials
+package textures
 
 import (
-	"framework/graphics/general"
 	"image"
 )
 
 type (
 	// TexManager ...
 	TexManager interface {
-		NewTex(img image.Image) uint32
-		DelTex(id uint32)
-	}
-
-	GlTexLoader interface {
-		GlLoad(tex Texture, img image.Image, device general.Device)
+		NewTex(img image.Image) Texture
+		DelTex(tex Texture)
 	}
 
 	Texture struct {

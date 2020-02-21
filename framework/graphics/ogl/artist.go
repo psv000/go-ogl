@@ -67,7 +67,7 @@ func (a *Artist) DrawMesh(glMesh interface{}, model, view, projection mth.Mat4f,
 }
 
 // DrawMeshGroup ...
-func (a *Artist) DrawMeshGroup(group *primitives.MeshGroup, view, projection mth.Mat4f){
+func (a *Artist) DrawMeshGroup(group *primitives.MeshGroup, view, projection mth.Mat4f) {
 	lu := group.GPUPack.Uniforms[program.UCLight]
 	lm := group.GPUPack.Uniforms[program.UCMesh]
 

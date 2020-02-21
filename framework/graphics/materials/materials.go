@@ -2,8 +2,7 @@ package materials
 
 import (
 	"encoding/json"
-	"image"
-	"image/png"
+	"framework/graphics/textures"
 	"os"
 	"runtime"
 
@@ -20,31 +19,22 @@ type (
 
 	// Manager ...
 	Manager struct {
-		tm TexManager
+		tm textures.TexManager
 
 		materials map[string]Material
-		atlases   map[uint32]atlas
+		atlases   map[textures.Texture]atlas
 	}
 )
 
 // NewManager ...
-func NewManager(tm TexManager) *Manager {
+func NewManager(tm textures.TexManager) *Manager {
 	man := &Manager{
 		materials: make(map[string]Material),
-		atlases:   make(map[uint32]atlas),
+		atlases:   make(map[textures.Texture]atlas),
 		tm:        tm,
 	}
 	runtime.SetFinalizer(man, (*Manager).free)
 	return man
-}
-
-func loadPng(filepath string) (image.Image, error) {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close() // nolint: errcheck
-	return png.Decode(f)
 }
 
 func loadMap(filepath string) (AtlasMapping, error) {
@@ -61,7 +51,7 @@ func loadMap(filepath string) (AtlasMapping, error) {
 
 // LoadAtlas ...
 func (m *Manager) LoadAtlas(filepath AtlasPath) error {
-	data, err := loadPng(filepath.image)
+	data, err := loadJPEG(filepath.image)
 	if err != nil {
 		return errors.Wrap(err, materialManagerInfoTag)
 	}
@@ -70,18 +60,18 @@ func (m *Manager) LoadAtlas(filepath AtlasPath) error {
 		return errors.Wrap(err, materialManagerInfoTag)
 	}
 
-	texID := m.tm.NewTex(data)
-	m.atlases[texID] = atlas{
+	texture := m.tm.NewTex(data)
+	m.atlases[texture] = atlas{
 		name: mapping.Name,
 	}
 	for _, mp := range mapping.Materials {
 		m.materials[mp.Name] = Material{
-			ID:    mp.Name,
-			TexID: texID,
-			X:     mp.X,
-			Y:     mp.Y,
-			Z:     mp.Z,
-			W:     mp.W,
+			ID:      mp.Name,
+			Texture: texture,
+			X:       mp.X,
+			Y:       mp.Y,
+			Z:       mp.Z,
+			W:       mp.W,
 		}
 	}
 	return nil
@@ -91,12 +81,12 @@ func (m *Manager) LoadAtlas(filepath AtlasPath) error {
 func (m *Manager) Get(name string) (Material, bool) {
 	mat, found := m.materials[name]
 	if found {
-		atl, ok := m.atlases[mat.TexID]
+		atl, ok := m.atlases[mat.Texture]
 		if !ok {
 			return Material{}, false
 		}
 		atl.uses++
-		m.atlases[mat.TexID] = atl
+		m.atlases[mat.Texture] = atl
 	}
 	return mat, found
 }
@@ -105,12 +95,12 @@ func (m *Manager) Get(name string) (Material, bool) {
 func (m *Manager) Release(name string) {
 	mat, found := m.materials[name]
 	if found {
-		atl, found := m.atlases[mat.TexID]
+		atl, found := m.atlases[mat.Texture]
 		if !found || atl.uses < 1 {
 			return
 		}
 		atl.uses--
-		m.atlases[mat.TexID] = atl
+		m.atlases[mat.Texture] = atl
 	}
 }
 

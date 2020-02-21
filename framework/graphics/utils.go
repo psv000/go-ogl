@@ -1,11 +1,11 @@
 package graphics
 
 import (
-	"errors"
 	"framework/graphics/general"
 	"framework/graphics/ogl"
 	"framework/graphics/primitives"
 	"framework/graphics/program"
+	"github.com/pkg/errors"
 )
 
 func loadFromV3f(dev general.Device, data interface{}, indices []uint32) (*primitives.Mesh, error) {
